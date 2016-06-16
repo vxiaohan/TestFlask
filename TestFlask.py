@@ -49,7 +49,7 @@ def try_template():
 @auth.verify_password
 def verify_password(username_or_token, user_pass):
     print(username_or_token)
-    user = User.verify_auth_token(username_or_token)
+    user = User.verify_auth_token(username_or_token, app.config['SECRET_KAY'])
     if not user:
         print('Not token')
         user = db_session.query(User).filter(User.user_name == username_or_token).first()
@@ -68,9 +68,9 @@ def verify_password(username_or_token, user_pass):
 @app.route('/api/token')
 @auth.login_required
 def get_token():
-    token = g.user.generate_auth_token()
+    token = g.user.generate_auth_token(app.config['SECRET_KAY'])
     print(token)
-    return jsonify({'token': token.decode('ascii'), 'duration': 600})
+    return jsonify({'token': token.decode('utf8'), 'duration': 600})
 
 
 @app.route('/templa2')

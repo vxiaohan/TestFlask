@@ -26,25 +26,18 @@ class User(Base):
     def __repr__(self):
         return '<User %r>' % self.user_name
 
-    def generate_auth_token(self, expiration=600):
-        key = str(app.config['SECRET_KAY'])
+    def generate_auth_token(self, key, expiration=600):
         s = Serializer(key, expires_in=expiration)
         return s.dumps({'id': self.id})
 
     @staticmethod
-    def verify_auth_token(token):
-        key = str(app.config['SECRET_KEY'])
+    def verify_auth_token(token, key):
         s = Serializer(key)
-        print('token token')
-        print(token)
         try:
-            data = s.loads(token)
-            print(data)
+            data = s.loads(token,return_header=True)
         except SignatureExpired:
-            print('SignatureExpired')
             return None
         except BadSignature:
-            print('BadSignature')
             return None
-        user = db_session.query(User).filter(User.id == data['id'])
+        user = db_session.query(User).filter(User.id == data[0]['id']).first()
         return user
